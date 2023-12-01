@@ -9,21 +9,18 @@ import {
   UseGuards,
   Request,
   Query,
-  Res,
   HttpStatus,
   HttpException,
   UnauthorizedException,
-  Req,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from './local-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { Request as ExpressRequest, Response } from 'express';
 
 @Controller('user')
 export class UserController {
@@ -194,5 +191,51 @@ export class UserController {
       status: 'Success',
       description: 'Logged out successfully',
     };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    try {
+      await this.userService.handleForgotPassword(email);
+      return {
+        code: HttpStatus.OK,
+        status: 'Success',
+        description: 'Email with the OTP has been sent.',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          code: HttpStatus.NOT_FOUND,
+          status: 'Not Found',
+          description: 'Email not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body('otp') otp: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    if (!otp || otp.trim() === '') {
+      throw new BadRequestException('OTP is required');
+    }
+
+    try {
+      await this.userService.resetPassword(otp, newPassword);
+      return {
+        code: HttpStatus.OK,
+        status: 'Success',
+        description: 'Password successfully reset',
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Could not reset the password');
+    }
   }
 }

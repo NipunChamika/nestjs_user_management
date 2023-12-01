@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +11,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import * as bcrypt from 'bcrypt';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -15,6 +21,7 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   // Find a user by the email address
@@ -211,5 +218,54 @@ export class UserService {
     this.refreshTokens = this.refreshTokens.filter(
       (rt) => rt.refreshToken !== token,
     );
+  }
+
+  // Generate OTP
+  generateOtp(): string {
+    const otp = Math.floor(Math.random() * 9000) + 1000;
+
+    return otp.toString();
+  }
+
+  // Handle Forgot Password
+  async handleForgotPassword(email: string): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Generate OTP
+    const otp = this.generateOtp();
+    user.otp = otp;
+    user.flag = true;
+    await this.userRepository.save(user);
+
+    // Send Email with OTP
+    this.mailService.sendOtpEmail(user.email, otp);
+  }
+
+  // Reset Password
+  async resetPassword(
+    // email: string,
+    otp: string,
+    newPassword: string,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { otp, flag: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and reset flag/otp
+    user.password = hashedPassword;
+    user.flag = false;
+    user.otp = null;
+    await this.userRepository.save(user);
   }
 }

@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -15,12 +16,13 @@ import { JwtStrategy } from './jwt.strategy';
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.SECRET_KEY,
-        signOptions: { expiresIn: "1h" }
-      })
-    })
+        signOptions: { expiresIn: '1h' },
+      }),
+    }),
+    MailModule,
   ],
   controllers: [UserController],
   providers: [UserService, LocalStrategy, JwtStrategy],
-  exports: [UserService]
+  exports: [UserService],
 })
 export class UserModule {}
