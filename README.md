@@ -17,6 +17,7 @@ Clone the repository and install dependencies.
 git clone https://github.com/yourusername/nestjs-user-management.git
 cd nestjs-user-management
 npm install
+```
 
 ## Configuration
 
