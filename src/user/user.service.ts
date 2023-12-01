@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -226,6 +227,7 @@ export class UserService {
     return otp.toString();
   }
 
+  // Handle Forgot Password
   async handleForgotPassword(email: string): Promise<void> {
     const user = await this.userRepository.findOne({ where: { email } });
 
@@ -241,5 +243,29 @@ export class UserService {
 
     // Send Email with OTP
     this.mailService.sendOtpEmail(user.email, otp);
+  }
+
+  // Reset Password
+  async resetPassword(
+    // email: string,
+    otp: string,
+    newPassword: string,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { otp, flag: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and reset flag/otp
+    user.password = hashedPassword;
+    user.flag = false;
+    user.otp = null;
+    await this.userRepository.save(user);
   }
 }

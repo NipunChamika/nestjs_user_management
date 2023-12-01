@@ -13,6 +13,7 @@ import {
   HttpException,
   UnauthorizedException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,6 +21,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from './local-auth.guard';
 import { ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ResetPasswordDTO } from './dto/reset-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -210,6 +212,31 @@ export class UserController {
         },
         HttpStatus.NOT_FOUND,
       );
+    }
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body('otp') otp: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    if (!otp || otp.trim() === '') {
+      throw new BadRequestException('OTP is required');
+    }
+
+    try {
+      await this.userService.resetPassword(otp, newPassword);
+      return {
+        code: HttpStatus.OK,
+        status: 'Success',
+        description: 'Password successfully reset',
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Could not reset the password');
     }
   }
 }
