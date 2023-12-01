@@ -9,21 +9,17 @@ import {
   UseGuards,
   Request,
   Query,
-  Res,
   HttpStatus,
   HttpException,
   UnauthorizedException,
-  Req,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from './local-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
 import { ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { Request as ExpressRequest, Response } from 'express';
 
 @Controller('user')
 export class UserController {
@@ -194,5 +190,26 @@ export class UserController {
       status: 'Success',
       description: 'Logged out successfully',
     };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    try {
+      await this.userService.handleForgotPassword(email);
+      return {
+        code: HttpStatus.OK,
+        status: 'Success',
+        description: 'Email with the OTP has been sent.',
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          code: HttpStatus.NOT_FOUND,
+          status: 'Not Found',
+          description: 'Email not found.',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 }
