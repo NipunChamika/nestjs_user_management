@@ -21,7 +21,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from './local-auth.guard';
 import { ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ResetPasswordDTO } from './dto/reset-password.dto';
 
 @Controller('user')
 export class UserController {
