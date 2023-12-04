@@ -216,15 +216,24 @@ export class UserController {
 
   @Post('reset-password')
   async resetPassword(
+    @Body('email') email: string,
     @Body('otp') otp: string,
     @Body('newPassword') newPassword: string,
   ) {
+    if (!email || email.trim() === '') {
+      throw new BadRequestException('Email is required');
+    }
+
     if (!otp || otp.trim() === '') {
       throw new BadRequestException('OTP is required');
     }
 
+    if (!newPassword || newPassword.trim() === '') {
+      throw new BadRequestException('New password is required');
+    }
+
     try {
-      await this.userService.resetPassword(otp, newPassword);
+      await this.userService.resetPassword(email, otp, newPassword);
       return {
         code: HttpStatus.OK,
         status: 'Success',
