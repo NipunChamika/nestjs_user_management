@@ -228,6 +228,10 @@ export class UserController {
       throw new BadRequestException('OTP is required');
     }
 
+    if (!newPassword || newPassword.trim() === '') {
+      throw new BadRequestException('New password is required');
+    }
+
     try {
       await this.userService.resetPassword(email, otp, newPassword);
       return {
