@@ -247,16 +247,16 @@ export class UserService {
 
   // Reset Password
   async resetPassword(
-    // email: string,
+    email: string,
     otp: string,
     newPassword: string,
   ): Promise<void> {
     const user = await this.userRepository.findOne({
-      where: { otp, flag: true },
+      where: { email, otp, flag: true },
     });
 
     if (!user) {
-      throw new BadRequestException('Invalid OTP');
+      throw new BadRequestException('Invalid OTP or Email');
     }
 
     // Hash the new password
