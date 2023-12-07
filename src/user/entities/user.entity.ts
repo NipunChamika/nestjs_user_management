@@ -22,4 +22,7 @@ export class User {
 
   @Column({ nullable: true, length: 4 })
   otp: string;
+
+  @Column({ nullable: true })
+  requestedAt: Date;
 }
