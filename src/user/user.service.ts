@@ -237,6 +237,7 @@ export class UserService {
 
     // Generate OTP
     const otp = this.generateOtp();
+    user.requestedAt = new Date();
     user.otp = otp;
     user.flag = true;
     await this.userRepository.save(user);
@@ -257,6 +258,20 @@ export class UserService {
 
     if (!user) {
       throw new BadRequestException('Invalid OTP or Email');
+    }
+
+    // Check if OTP is expired
+    const expirationTime = Number(process.env.EXPIRATION);
+    const currentTime = new Date();
+    const requestedAt = new Date(user.requestedAt);
+    const timeDiff = currentTime.getTime() - requestedAt.getTime();
+
+    if (timeDiff > expirationTime * 1000) {
+      // Invalidate OTP
+      user.otp = null;
+      user.flag = false;
+      await this.userRepository.save(user);
+      throw new BadRequestException('OTP has expired');
     }
 
     // Hash the new password
