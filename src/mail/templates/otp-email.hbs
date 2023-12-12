@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <style>
+      body { font-family: Arial, sans-serif; background-color: #f4f4f4; color:
+      #333; line-height: 1.6; } .container { max-width: 600px; margin: 40px
+      auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0
+      0 10px rgba(0, 0, 0, 0.1); } .header { text-align: center; padding-bottom:
+      20px; border-bottom: 1px solid #eee; } .header h1 { margin: 0; } .content
+      p { margin: 0; padding: 5px 0; } .otp-container { text-align: center; }
+      .otp-code { font-size: 24px; color: #d35400; padding: 10px; margin: 20px
+      0; border: 1px dashed #d35400; border-radius: 5px; display: inline-block;
+      max-width: 200px; text-align: center; } .footer { text-align: center;
+      padding-top: 20px; border-top: 1px solid #eee; }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <h1>Your OTP Code</h1>
+      </div>
+      <div class='content'>
+        <p>Dear user,</p>
+        <div class='otp-container'>
+          <strong class='otp-code'>{{otp}}</strong>
+        </div>
+        <p>
+          This code is valid for the next 5 minutes. Please do not share this
+          code with anyone.
+        </p>
+      </div>
+      <div class='footer'>
+        <p>Thank you for using our service.</p>
+      </div>
+    </div>
+  </body>
+</html>

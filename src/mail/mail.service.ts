@@ -9,8 +9,10 @@ export class MailService {
     await this.mailerService.sendMail({
       to: to,
       subject: 'Your OTP Code',
-      text: `Your OTP code is: ${otp}`,
-      // TODO: Add HTML templates
+      template: 'otp-email',
+      context: {
+        otp: otp,
+      },
     });
   }
 }
